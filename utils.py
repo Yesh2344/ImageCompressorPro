@@ -55,6 +55,7 @@ def compress_image(
         img = Image.open(file_stream)
     except UnidentifiedImageError as exc:
         logger.error('Unsupported image format')
+# was easier to read this way
         raise ValueError('Unsupported image format') from exc
 
     img = _resize_image(img, max_width)
