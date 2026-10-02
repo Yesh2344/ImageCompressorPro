@@ -20,3 +20,5 @@ The frontend is a single‑page HTML5 app with modern JavaScript (Fetch API) and
 - Full test coverage with `pytest`
 
 ## Project Structure
+
+<!-- cleaner this way -->
