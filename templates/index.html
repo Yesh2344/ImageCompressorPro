@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ImageCompressorPro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f4; color:#333;}
+        .container {max-width: 800px; margin: 2rem auto; background:#fff; padding:2rem; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+        h1 {text-align:center;}
+        .drop-zone {
+            border: 2px dashed #bbb; border-radius: 8px; padding: 2rem; text-align:center;
+            transition: background .3s;
+        }
+        .drop-zone.dragover {background:#e0ffe0;}
+        #preview {margin-top:1rem; max-width:100%; height:auto; display:none;}
+        button {margin-top:1rem; padding:.5rem 1rem; font-size:1rem; cursor:pointer;}
+        #downloadLink {display:none; margin-top:1rem;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>ImageCompressorPro</h1>
+    <div class="drop-zone" id="dropZone">
+        Drag &amp; drop an image here or click to select
+        <input type="file" id="fileInput" accept="image/*" style="display:none;">
+    </div>
+    <img id="preview" alt="Image preview">
+    <div>
+        <label for="maxKb">Target size (KB): </label>
+        <input type="number" id="maxKb" value="200" min="10" max="1024">
+    </div>
+    <button id="compressBtn" disabled>Compress</button>
+    <a id="downloadLink" href="#" download>Download compressed image</a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const compressBtn = document.getElementById('compressBtn');
+    const downloadLink = document.getElementById('downloadLink');
+    const maxKbInput = document.getElementById('maxKb');
+
+    let selectedFile = null;
+
+    // Drag & drop handlers
+    ['dragenter','dragover'].forEach(evt => {
+        dropZone.addEventListener(evt, e => {
+            e.preventDefault(); e.stopPropagation();
+            dropZone.classList.add('dragover');
+        });
+    });
+
+    ['dragleave','drop'].forEach(evt => {
+        dropZone.addEventListener(evt, e => {
+            e.preventDefault(); e.stopPropagation();
+            dropZone.classList.remove('dragover');
+        });
+    });
+
+    dropZone.addEventListener('drop', e => {
+        const files = e.dataTransfer.files;
+        if (files.length) handleFile(files[0]);
+    });
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => {
+        if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+        if (!file.type.startsWith('image/')) {
+            alert('Please select a valid image file.');
+            return;
+        }
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            compressBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    compressBtn.addEventListener('click', async () => {
+        if (!selectedFile) return;
+        compressBtn.disabled = true;
+        compressBtn.textContent = 'Compressing...';
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('max_kb', maxKbInput.value);
+
+        try {
+            const response = await fetch('/compress', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                alert('Error: ' + err.error);
+                return;
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            downloadLink.href = url;
+            downloadLink.download = 'compressed_' + selectedFile.name;
+            downloadLink.style.display = 'inline-block';
+        } catch (e) {
+            console.error(e);
+            alert('Unexpected error occurred.');
+        } finally {
+            compressBtn.disabled = false;
+            compressBtn.textContent = 'Compress';
+        }
+    });
+});
+</script>
+</body>
+</html>
