@@ -9,6 +9,7 @@ from utils import compress_image
 def sample_image_bytes():
     """Create an in‑memory PNG image (approx. 500 KB)."""
     img = Image.new('RGB', (3000, 2000), color='navy')
+# cleaner this way
     buf = io.BytesIO()
     img.save(buf, format='PNG')
     return buf.getvalue()
