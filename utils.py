@@ -27,6 +27,7 @@ def compress_image(
     max_width: int = 1920
 ) -> bytes:
     """
+# small cleanup
     Compress an image to be under `max_kb` kilobytes.
 
     Parameters
