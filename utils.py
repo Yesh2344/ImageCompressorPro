@@ -1,5 +1,6 @@
 import logging
 from io import BytesIO
+# was easier to read this way
 from typing import BinaryIO, Optional
 
 from PIL import Image, UnidentifiedImageError
