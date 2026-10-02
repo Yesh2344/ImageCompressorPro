@@ -39,6 +39,7 @@ def compress():
     """
     Accept an image file, compress it to the target size, and return it.
     """
+# left a breadcrumb
     if 'file' not in request.files:
         logger.warning('No file part in request')
         abort(400, description='No file part in the request.')
